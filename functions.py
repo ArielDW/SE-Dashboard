@@ -11,6 +11,10 @@ endMs = 1763082815516
 
 SAMSARA_API = st.secrets["SAMSARA_API"]
 
+# ============================================================================
+# ACTIVE FUNCTIONS - Currently used in streamlit_app.py
+# ============================================================================
+
 # Gets the organization Name and ID.
 def get_org_details():
     """Retrieve organization details from Samsara API"""
@@ -201,54 +205,6 @@ def get_historic_temperature(widgetId, startMs, endMs, stepMs=300000):
         print(f"Error fetching temperature data: {e}")
         return pd.DataFrame(columns=["timeMs", "ambientTemperature"])
 
-# test = get_historic_temperature(widgetId=278018084915903, startMs=1763100000000, endMs=1763102700000, stepMs=300000)
-# print(test)
-
-
-
-def get_historic_humidity(widgetId, startMs, endMs, stepMs=300000):
-    """Get historic humidity data for a specific sensor"""
-    url = "https://api.samsara.com/v1/sensors/history"
-    
-    payload = {
-        "fillMissing": "withPrevious",
-        "series": [
-            {
-                "field": "humidity",
-                "widgetId": widgetId
-            }
-        ],
-        "endMs": endMs,
-        "startMs": startMs,
-        "stepMs": stepMs
-    }
-    
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "authorization": f"Bearer {SAMSARA_API}"
-    }
-    
-    try:
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        
-        if not data.get("results"):
-            return pd.DataFrame(columns=["timeMs", "humidity"])
-        
-        df = pd.DataFrame(data["results"])
-        df['humidity'] = df['series'].str[0]
-        df = df.drop(columns=['series'])
-        return df
-    except Exception as e:
-        print(f"Error fetching humidity data: {e}")
-        return pd.DataFrame(columns=["timeMs", "humidity"])
-
-# test = get_historic_humidity(widgetId=278018084915903, startMs=1763100000000, endMs=1763102700000, stepMs=300000)
-# print(test)
-
-
 
 def get_historic_door(widgetId, startMs, endMs, stepMs=5000):
     """Get historic door status data for a specific sensor"""
@@ -289,58 +245,6 @@ def get_historic_door(widgetId, startMs, endMs, stepMs=5000):
         print(f"Error fetching door data: {e}")
         return pd.DataFrame(columns=["timeMs", "doorClosed"])
 
-# test = get_historic_door(widgetId=278018084915903, startMs=1763100000000, endMs=1763102700000, stepMs=5000)
-# print(test)
-
-
-def get_current_status(vehicle_id, sensor_config):
-    """Get current temperature, humidity, and door status for a vehicle"""
-    try:
-        status = {
-            "temperature": None,
-            "humidity": None,
-            "door_status": None,
-            "last_updated": datetime.now().isoformat()
-        }
-        
-        # Get temperature sensor data
-        if sensor_config.get("temperature"):
-            temp_sensor_id = sensor_config["temperature"][0]["id"]
-            current_time_ms = int(datetime.now().timestamp() * 1000)
-            start_time_ms = current_time_ms - 300000  # Last 5 minutes
-            
-            df_temp = get_historic_temperature(temp_sensor_id, start_time_ms, current_time_ms, stepMs=60000)
-            if not df_temp.empty:
-                status["temperature"] = df_temp['ambientTemperature'].iloc[-1]
-        
-        # Get humidity sensor data
-        if sensor_config.get("humidity"):
-            humidity_sensor_id = sensor_config["humidity"][0]["id"]
-            current_time_ms = int(datetime.now().timestamp() * 1000)
-            start_time_ms = current_time_ms - 300000
-            
-            df_humidity = get_historic_humidity(humidity_sensor_id, start_time_ms, current_time_ms, stepMs=60000)
-            if not df_humidity.empty:
-                status["humidity"] = df_humidity['humidity'].iloc[-1]
-        
-        # Get door status
-        if sensor_config.get("door"):
-            door_sensor_id = sensor_config["door"][0]["id"]
-            current_time_ms = int(datetime.now().timestamp() * 1000)
-            start_time_ms = current_time_ms - 60000  # Last 1 minute
-            
-            df_door = get_historic_door(door_sensor_id, start_time_ms, current_time_ms, stepMs=5000)
-            if not df_door.empty:
-                door_closed = df_door['doorClosed'].iloc[-1]
-                status["door_status"] = "Closed" if door_closed else "Open"
-        
-        return status
-    except Exception as e:
-        print(f"Error getting current status: {e}")
-        return None
-
-
-
 
 def celsius_to_fahrenheit(celsius):
     """Convert Celsius to Fahrenheit"""
@@ -348,44 +252,15 @@ def celsius_to_fahrenheit(celsius):
         return None
     return (celsius * 9/5) + 32
 
-def fahrenheit_to_celsius(fahrenheit):
-    """Convert Fahrenheit to Celsius"""
-    if fahrenheit is None:
-        return None
-    return (fahrenheit - 32) * 5/9
 
 def ms_to_datetime(ms):
     """Convert milliseconds since epoch to datetime"""
     return datetime.fromtimestamp(ms / 1000)
 
+
 def datetime_to_ms(dt):
     """Convert datetime to milliseconds since epoch"""
     return int(dt.timestamp() * 1000)
-
-def calculate_time_range_ms(hours):
-    """Calculate start and end time in milliseconds based on hours back"""
-    current_time = datetime.now()
-    start_time = current_time - pd.Timedelta(hours=hours)
-    
-    return datetime_to_ms(start_time), datetime_to_ms(current_time)
-
-def get_all_sensors():
-    """Get all sensors in the organization"""
-    url = "https://api.samsara.com/v1/sensors/list"
-    headers = {
-        "accept": "application/json",
-        "authorization": f"Bearer {SAMSARA_API}"
-    }
-    
-    try:
-        response = requests.post(url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        df = pd.DataFrame(data["sensors"])
-        return df
-    except Exception as e:
-        print(f"Error fetching sensors: {e}")
-        return pd.DataFrame()
 
 
 def get_current_temperature(widgetId):
@@ -427,9 +302,6 @@ def get_current_temperature(widgetId):
         print(f"Error fetching current temperature: {e}")
         return None
 
-# test = get_current_temperature(278018088211512)
-# print(test)
-
 
 def get_current_door_status(widgetId):
     """Get current door status for a specific sensor
@@ -470,5 +342,128 @@ def get_current_door_status(widgetId):
         print(f"Error fetching current door status: {e}")
         return None
 
-# test = get_current_door_status(278018089917378)
-# print(test)
+
+# ============================================================================
+# UNUSED FUNCTIONS - Not currently called in streamlit_app.py
+# Commented out to clean up code. Uncomment if needed in the future.
+# ============================================================================
+
+# def get_historic_humidity(widgetId, startMs, endMs, stepMs=300000):
+#     """Get historic humidity data for a specific sensor"""
+#     url = "https://api.samsara.com/v1/sensors/history"
+#     
+#     payload = {
+#         "fillMissing": "withPrevious",
+#         "series": [
+#             {
+#                 "field": "humidity",
+#                 "widgetId": widgetId
+#             }
+#         ],
+#         "endMs": endMs,
+#         "startMs": startMs,
+#         "stepMs": stepMs
+#     }
+#     
+#     headers = {
+#         "accept": "application/json",
+#         "content-type": "application/json",
+#         "authorization": f"Bearer {SAMSARA_API}"
+#     }
+#     
+#     try:
+#         response = requests.post(url, json=payload, headers=headers)
+#         response.raise_for_status()
+#         data = response.json()
+#         
+#         if not data.get("results"):
+#             return pd.DataFrame(columns=["timeMs", "humidity"])
+#         
+#         df = pd.DataFrame(data["results"])
+#         df['humidity'] = df['series'].str[0]
+#         df = df.drop(columns=['series'])
+#         return df
+#     except Exception as e:
+#         print(f"Error fetching humidity data: {e}")
+#         return pd.DataFrame(columns=["timeMs", "humidity"])
+
+
+# def get_current_status(vehicle_id, sensor_config):
+#     """Get current temperature, humidity, and door status for a vehicle"""
+#     try:
+#         status = {
+#             "temperature": None,
+#             "humidity": None,
+#             "door_status": None,
+#             "last_updated": datetime.now().isoformat()
+#         }
+#         
+#         # Get temperature sensor data
+#         if sensor_config.get("temperature"):
+#             temp_sensor_id = sensor_config["temperature"][0]["id"]
+#             current_time_ms = int(datetime.now().timestamp() * 1000)
+#             start_time_ms = current_time_ms - 300000  # Last 5 minutes
+#             
+#             df_temp = get_historic_temperature(temp_sensor_id, start_time_ms, current_time_ms, stepMs=60000)
+#             if not df_temp.empty:
+#                 status["temperature"] = df_temp['ambientTemperature'].iloc[-1]
+#         
+#         # Get humidity sensor data
+#         if sensor_config.get("humidity"):
+#             humidity_sensor_id = sensor_config["humidity"][0]["id"]
+#             current_time_ms = int(datetime.now().timestamp() * 1000)
+#             start_time_ms = current_time_ms - 300000
+#             
+#             df_humidity = get_historic_humidity(humidity_sensor_id, start_time_ms, current_time_ms, stepMs=60000)
+#             if not df_humidity.empty:
+#                 status["humidity"] = df_humidity['humidity'].iloc[-1]
+#         
+#         # Get door status
+#         if sensor_config.get("door"):
+#             door_sensor_id = sensor_config["door"][0]["id"]
+#             current_time_ms = int(datetime.now().timestamp() * 1000)
+#             start_time_ms = current_time_ms - 60000  # Last 1 minute
+#             
+#             df_door = get_historic_door(door_sensor_id, start_time_ms, current_time_ms, stepMs=5000)
+#             if not df_door.empty:
+#                 door_closed = df_door['doorClosed'].iloc[-1]
+#                 status["door_status"] = "Closed" if door_closed else "Open"
+#         
+#         return status
+#     except Exception as e:
+#         print(f"Error getting current status: {e}")
+#         return None
+
+
+# def fahrenheit_to_celsius(fahrenheit):
+#     """Convert Fahrenheit to Celsius"""
+#     if fahrenheit is None:
+#         return None
+#     return (fahrenheit - 32) * 5/9
+
+
+# def calculate_time_range_ms(hours):
+#     """Calculate start and end time in milliseconds based on hours back"""
+#     current_time = datetime.now()
+#     start_time = current_time - pd.Timedelta(hours=hours)
+#     
+#     return datetime_to_ms(start_time), datetime_to_ms(current_time)
+
+
+# def get_all_sensors():
+#     """Get all sensors in the organization"""
+#     url = "https://api.samsara.com/v1/sensors/list"
+#     headers = {
+#         "accept": "application/json",
+#         "authorization": f"Bearer {SAMSARA_API}"
+#     }
+#     
+#     try:
+#         response = requests.post(url, headers=headers)
+#         response.raise_for_status()
+#         data = response.json()
+#         df = pd.DataFrame(data["sensors"])
+#         return df
+#     except Exception as e:
+#         print(f"Error fetching sensors: {e}")
+#         return pd.DataFrame()
