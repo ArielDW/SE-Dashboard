@@ -1,2 +1,6 @@
 streamlit
 pandas
+requests
+datetime
+plotly
+time
