@@ -370,7 +370,7 @@ if not temp_df.empty:
                 y=event_temps,
                 mode="markers",
                 name="Door Opened",
-                marker=dict(
+                marker=dict(  # https://plotly.com/python/marker-style/
                     color="orange",
                     size=8,
                     symbol="diamond",
