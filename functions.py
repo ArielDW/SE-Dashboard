@@ -21,11 +21,11 @@ from datetime import datetime
 # ============================================================================
 
 # Default sensor ID for testing/development purposes
-widgetId = 278018088211512
+# widgetId = 278018088211512
 
-# Default time range in milliseconds since Unix epoch
-startMs = 1763064102000  # Start time for historical queries
-endMs = 1763082815516    # End time for historical queries
+# Default time range in milliseconds since Unix epoch for testing
+# startMs = 1763064102000  # Start time for historical queries
+# endMs = 1763082815516    # End time for historical queries
 
 # Samsara API authentication token retrieved from Streamlit secrets
 SAMSARA_API = st.secrets["SAMSARA_API"]
@@ -42,6 +42,11 @@ def get_org_details():
     organization's ID and name.
     
     API Endpoint: GET https://api.samsara.com/me
+    
+    Used in UI: Sidebar - Organization Info Box
+    - Displays organization name and ID at the top of the sidebar
+    - Cached for 1 hour using @st.cache_data(ttl=3600)
+    - Shows in blue info box with organization icon
     
     Returns:
         tuple: (org_id, org_name) - Organization ID and name as strings
@@ -77,6 +82,19 @@ def get_vehicles():
     Handles pagination automatically to retrieve all vehicles.
     
     API Endpoint: GET https://api.samsara.com/fleet/vehicles
+    
+    Used in UI: Multiple Locations
+    1. Sidebar - Vehicle Selector Dropdown
+       - Populates the "Select Vehicle" dropdown with vehicle names
+       - Cached for 5 minutes using @st.cache_data(ttl=300)
+    
+    2. Sidebar - Sensors Table
+       - Displays all sensors for the selected vehicle
+       - Shows sensorType, sensorPosition, and sensorName columns
+    
+    3. Main Logic - Sensor ID Extraction
+       - Filters to get temperature sensor ID for the selected vehicle
+       - Filters to get door sensor ID for the selected vehicle
     
     Returns:
         pandas.DataFrame: DataFrame with the following columns:
@@ -233,6 +251,14 @@ def get_historic_temperature(widgetId, startMs, endMs, stepMs=300000):
     
     API Endpoint: POST https://api.samsara.com/v1/sensors/history
     
+    Used in UI: Main Content - Temperature Chart
+    - Fetches historical temperature data for the selected time range
+    - Called with stepMs=60000 (1 minute intervals) for detailed plotting
+    - Data is converted to Celsius, then optionally to Fahrenheit
+    - Plotted as a blue line chart with Plotly
+    - Used to calculate statistics (avg, min, max temperature)
+    - Used to detect threshold violations
+    
     Args:
         widgetId (int): Sensor ID to query for temperature data
         startMs (int): Start time in milliseconds since Unix epoch
@@ -308,6 +334,16 @@ def get_historic_door(widgetId, startMs, endMs, stepMs=5000):
     
     API Endpoint: POST https://api.samsara.com/v1/sensors/history
     
+    Used in UI: Main Content - Door Events on Temperature Chart
+    - Fetches historical door status for the selected time range
+    - Called with stepMs=5000 (5 second intervals) for precise event detection
+    - Detects door open events (when doorClosed changes from True to False)
+    - Events displayed as either:
+      * Orange vertical dotted lines across the chart, OR
+      * Orange diamond markers on the temperature line
+    - Door event count shown in statistics section
+    - Door events table available in expandable section
+    
     Args:
         widgetId (int): Door sensor ID to query
         startMs (int): Start time in milliseconds since Unix epoch
@@ -379,6 +415,17 @@ def celsius_to_fahrenheit(celsius):
     
     Uses the standard conversion formula: (°C × 9/5) + 32 = °F
     
+    Used in UI: Multiple Locations (when Fahrenheit is selected)
+    1. Live Status Section - Current Temperature Metric
+       - Converts current temperature reading to Fahrenheit
+    
+    2. Main Chart - Temperature Data
+       - Converts all historical temperature readings to Fahrenheit
+       - Applied to entire temp_df["celsius"] column
+    
+    3. Statistics Section
+       - Average, minimum, and maximum temperatures displayed in Fahrenheit
+    
     Args:
         celsius (float or None): Temperature in Celsius
     
@@ -398,6 +445,12 @@ def ms_to_datetime(ms):
     """
     Convert Unix timestamp in milliseconds to Python datetime object.
     
+    Used in UI: Data Processing for Charts
+    - Converts timeMs column from temperature DataFrame to datetime
+    - Converts timeMs column from door DataFrame to datetime
+    - Used for x-axis values in Plotly charts
+    - Applied using: temp_df["datetime"] = temp_df["timeMs"].apply(fn.ms_to_datetime)
+    
     Args:
         ms (int): Timestamp in milliseconds since Unix epoch (Jan 1, 1970)
     
@@ -414,6 +467,15 @@ def ms_to_datetime(ms):
 def datetime_to_ms(dt):
     """
     Convert Python datetime object to Unix timestamp in milliseconds.
+    
+    Used in UI: Sidebar - Time Range Configuration
+    - Converts start_time (datetime) to start_ms for API calls
+    - Converts end_time (datetime) to end_ms for API calls
+    - Handles all time range options:
+      * "Now (Last 24 hours)"
+      * "Last 7 days"
+      * "Last 30 days"
+      * "Custom Range" (from date/time pickers)
     
     Args:
         dt (datetime): Python datetime object
@@ -436,6 +498,14 @@ def get_current_temperature(widgetId):
     specify a time range. Useful for real-time monitoring dashboards.
     
     API Endpoint: POST https://api.samsara.com/v1/sensors/temperature
+    
+    Used in UI: Live Status Section - Current Temperature Metric
+    - Updates every 5 seconds in the live metrics section
+    - Displayed in the middle column of the 3-column layout
+    - Shows temperature with 1 decimal place and unit symbol
+    - Called by update_live_metrics() function
+    - Runs in a loop for 2 minutes (24 cycles × 5 seconds)
+    - Countdown timer shows "Next update in Xs"
     
     Args:
         widgetId (int): Sensor ID to query for current temperature
@@ -497,6 +567,14 @@ def get_current_door_status(widgetId):
     to specify a time range. Useful for real-time monitoring dashboards.
     
     API Endpoint: POST https://api.samsara.com/v1/sensors/door
+    
+    Used in UI: Live Status Section - Door Status Metric
+    - Updates every 5 seconds in the live metrics section
+    - Displayed in the right column of the 3-column layout
+    - Shows "🔒 Closed" or "🔓 Open" with emoji icons
+    - Called by update_live_metrics() function
+    - Runs in a loop for 2 minutes (24 cycles × 5 seconds)
+    - Only called if vehicle has a door sensor
     
     Args:
         widgetId (int): Door sensor ID to query for current status
@@ -573,6 +651,10 @@ def get_current_door_status(widgetId):
 #     
 #     API Endpoint: POST https://api.samsara.com/v1/sensors/history
 #     
+#     NOT CURRENTLY USED IN UI
+#     - Could be used to add humidity monitoring to the dashboard
+#     - Would require similar chart and statistics as temperature
+#     
 #     Args:
 #         widgetId (int): Humidity sensor ID to query
 #         startMs (int): Start time in milliseconds since Unix epoch
@@ -633,6 +715,12 @@ def get_current_door_status(widgetId):
 #     
 #     Aggregates all sensor readings for a vehicle into a single status object.
 #     Useful for dashboard overview displays showing all metrics at once.
+#     
+#     NOT CURRENTLY USED IN UI
+#     - Current UI uses separate calls to get_current_temperature() and 
+#       get_current_door_status() instead
+#     - Could be used to simplify the update_live_metrics() function
+#     - Would need modification to work with current data structure
 #     
 #     Args:
 #         vehicle_id (int): Vehicle ID to get status for
@@ -705,6 +793,11 @@ def get_current_door_status(widgetId):
 #     Inverse of celsius_to_fahrenheit(). Uses the standard conversion
 #     formula: (°F - 32) × 5/9 = °C
 #     
+#     NOT CURRENTLY USED IN UI
+#     - Current UI only converts from Celsius to Fahrenheit
+#     - API always returns data in Celsius (millidegrees)
+#     - Could be useful if user input in Fahrenheit is added
+#     
 #     Args:
 #         fahrenheit (float or None): Temperature in Fahrenheit
 #     
@@ -726,6 +819,11 @@ def get_current_door_status(widgetId):
 #     
 #     Helper function to generate time ranges for historical queries without
 #     manually calculating timestamps.
+#     
+#     NOT CURRENTLY USED IN UI
+#     - Current UI calculates time ranges directly using datetime and timedelta
+#     - Then converts using datetime_to_ms()
+#     - Could simplify time range calculation in sidebar
 #     
 #     Args:
 #         hours (int or float): Number of hours to look back from current time
@@ -753,6 +851,13 @@ def get_current_door_status(widgetId):
 #     a flat list of all sensors.
 #     
 #     API Endpoint: POST https://api.samsara.com/v1/sensors/list
+#     
+#     NOT CURRENTLY USED IN UI
+#     - Current UI uses get_vehicles() which includes sensor information
+#     - Could be useful for:
+#       * Sensor inventory management page
+#       * Finding unassigned sensors
+#       * Sensor health monitoring across all devices
 #     
 #     Returns:
 #         pandas.DataFrame: DataFrame containing all sensor information
