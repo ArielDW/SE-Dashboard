@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import functions as fn
+import functions as fn # This is the functions.py file.
 import time
 
 # Page configuration
 st.set_page_config(
-    page_title="Temperature & Door Monitoring Dashboard",
-    page_icon="📡",
+    page_title="Reefer Monitoring",
+    page_icon="🚚",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -61,8 +61,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Title
-st.title("🌡️ Temperature & Door Monitoring Dashboard")
-st.markdown("Monitor vehicle temperatures and door events in real-time")
+st.title("Refeer Overview")
+st.markdown("Monitor temperatures and door events in real-time, analyze historical events.")
 
 # Sidebar configuration
 # Get organization details
@@ -76,7 +76,7 @@ org_id, org_name = load_org_details()
 if org_id and org_name:
     st.sidebar.markdown(f"""
     <div class="org-info">
-        <p><strong>🏢 Organization</strong></p>
+        <p><strong>Organization</strong></p>
         <p><strong>Name:</strong> {org_name}</p>
         <p><strong>ID:</strong> {org_id}</p>
     </div>
@@ -145,7 +145,7 @@ else:
     st.sidebar.write("_No sensors configured for this vehicle._")
 
 # Date range selector
-st.sidebar.subheader("📅 Time Range")
+st.sidebar.subheader("Time Range")
 
 time_option = st.sidebar.radio(
     "Select time range:",
@@ -180,17 +180,17 @@ start_ms = fn.datetime_to_ms(start_time)
 end_ms = fn.datetime_to_ms(end_time)
 
 # Temperature thresholds
-st.sidebar.subheader("🌡️ Temperature Thresholds")
+st.sidebar.subheader("Temperature Thresholds")
 temp_unit = st.sidebar.radio("Temperature Unit", ["Celsius", "Fahrenheit"])
 
 if temp_unit == "Celsius":
-    default_min = -1
-    default_max = 5
+    default_min = 1
+    default_max = 6
     temp_symbol = "°C"
 else:
-    # Approximate Fahrenheit equivalents of -1°C and 5°C
-    default_min = 30
-    default_max = 41
+    # Approximate Fahrenheit equivalents
+    default_min = 33
+    default_max = 43
     temp_symbol = "°F"
 
 min_temp = st.sidebar.number_input(
@@ -205,7 +205,7 @@ max_temp = st.sidebar.number_input(
 )
 
 # Door event display option
-st.sidebar.subheader("🚪 Door Events Display")
+st.sidebar.subheader("Door Events")
 door_display = st.sidebar.radio(
     "Display door events as:",
     ["Vertical Lines", "Markers"]
@@ -217,7 +217,7 @@ if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
     st.rerun()
 
 # ===== LIVE STATUS SECTION (updates every 5 seconds) =====
-st.markdown("### Live Status ")
+st.markdown("### 🟢 Live Status ")
 
 col1, col2, col3 = st.columns(3)
 
@@ -372,7 +372,7 @@ if not temp_df.empty:
                 name="Door Opened",
                 marker=dict(
                     color="orange",
-                    size=12,
+                    size=10,
                     symbol="diamond",
                     line=dict(color="darkorange", width=2)
                 ),
