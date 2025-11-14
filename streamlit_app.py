@@ -372,9 +372,9 @@ if not temp_df.empty:
                 name="Door Opened",
                 marker=dict(
                     color="orange",
-                    size=10,
+                    size=8,
                     symbol="diamond",
-                    line=dict(color="darkorange", width=2)
+                    line=dict(color="rgba(255, 140, 0, 0.8)", width=2)
                 ),
                 hovertemplate="<b>Door Opened</b><br><b>Time:</b> %{x}<br><b>Temperature:</b> %{y:.1f}" + temp_symbol + "<extra></extra>"
             ))
