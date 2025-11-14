@@ -1,18 +1,19 @@
-# :earth_americas: GDP dashboard template
+# Reefer monitoring solution
 
-A simple Streamlit app showing the GDP of different countries in the world.
+A Streamlit app displaying current and previous temperatures and door statuses.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://gdp-dashboard-template.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dashboard-l8.streamlit.app/)
 
-### How to run it on your own machine
+### How to run
 
 1. Install the requirements
 
    ```
    $ pip install -r requirements.txt
    ```
-
-2. Run the app
+2. Update the SAMSARA_API variable in the functions.py file to your Samsara API Token
+   
+3. Run the app
 
    ```
    $ streamlit run streamlit_app.py
