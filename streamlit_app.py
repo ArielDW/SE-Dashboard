@@ -655,7 +655,7 @@ cycles = 72  # 72 cycles * 5 seconds = 360 seconds (6 minutes)
 for _ in range(cycles):
     # Countdown from 5 to 1 seconds
     for remaining in range(5, 0, -1):
-        status_header.markdown(f"### 🟢 Live (_Next status update in {remaining}s_)")
+        status_header.markdown(f"### 🟢 Live (_Next status update in {remaining}s..._)")
         time.sleep(2)  # Wait 2 second
     # Update live metrics after countdown completes
     update_live_metrics()
