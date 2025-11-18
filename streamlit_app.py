@@ -330,7 +330,7 @@ def update_live_metrics():
         door_data = fn.get_current_door_status(door_sensor_id)
         if door_data and "doorClosed" in door_data:
             # Display with emoji: 🔒 for closed, 🔓 for open
-            door_status = "Closed" if door_data["doorClosed"] else "🔓 Open"
+            door_status = "✅ Closed" if door_data["doorClosed"] else "⚠️ Open"
             door_placeholder.metric("Door Status", door_status)
         else:
             # Show N/A if no data available
@@ -655,12 +655,12 @@ cycles = 24  # 24 cycles * 5 seconds = 120 seconds (2 minutes)
 for _ in range(cycles):
     # Countdown from 5 to 1 seconds
     for remaining in range(5, 0, -1):
-        status_header.markdown(f"### 🟢 Live Status (Next update in {remaining}s)")
+        status_header.markdown(f"### 🟢 Live Status (_Next update in {remaining}s_)")
         time.sleep(1)  # Wait 1 second
     # Update live metrics after countdown completes
     update_live_metrics()
 
 # After the loop ends, display message that updates have stopped
 status_header.markdown(
-    "### 🟢 Live Status (Live updates stopped. Click 🔄 Refresh Data to resume.)"
+    "### 🛑 Live Updates Stopped. Click 🔄 Refresh Data to resume.)"
 )
