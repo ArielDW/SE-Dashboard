@@ -37,11 +37,19 @@ st.set_page_config(
 )
 
 # ============================================================================
+# SESSION STATE INITIALIZATION
+# ============================================================================
+# Initialize session state for live update control
+
+if 'stop_updates' not in st.session_state:
+    st.session_state.stop_updates = False
+
+# ============================================================================
 # PAGE HEADER
 # ============================================================================
 # Display main title and subtitle for the dashboard
 
-st.title("Refeer Overview")
+st.title("Reefer Overview")
 st.markdown("Monitor temperatures and door events in real-time, analyze historical events.")
 
 # ============================================================================
@@ -178,17 +186,14 @@ time_option = st.sidebar.radio(
 
 # Calculate start and end times based on selected option
 if time_option == "Now (Last 24 hours)":
-    hours_back = 24
     end_time = datetime.now()
-    start_time = end_time - timedelta(hours=hours_back)
+    start_time = end_time - timedelta(hours=24)
 elif time_option == "Last 7 days":
-    hours_back = 24 * 7
     end_time = datetime.now()
-    start_time = end_time - timedelta(hours=hours_back)
+    start_time = end_time - timedelta(days=7)
 elif time_option == "Last 30 days":
-    hours_back = 24 * 30
     end_time = datetime.now()
-    start_time = end_time - timedelta(hours=hours_back)
+    start_time = end_time - timedelta(days=30)
 else:  # Custom Range
     # Display date and time pickers in two columns
     col1, col2 = st.sidebar.columns(2)
@@ -262,6 +267,7 @@ door_display = st.sidebar.radio(
 
 if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
     st.cache_data.clear()  # Clear all cached data
+    st.session_state.stop_updates = False  # Reset stop flag
     st.rerun()  # Rerun the entire app
 
 # ============================================================================
@@ -288,6 +294,22 @@ with col2:
 # Column 3: Current door status (updates every 5 seconds)
 with col3:
     door_placeholder = st.empty()  # Placeholder for dynamic updates
+
+# ============================================================================
+# LIVE UPDATE CONTROL BUTTONS
+# ============================================================================
+# Provide buttons to stop/resume live updates
+
+button_col1, button_col2 = st.columns(2)
+
+with button_col1:
+    if st.button("⏸️ Stop Live Updates", use_container_width=True):
+        st.session_state.stop_updates = True
+
+with button_col2:
+    if st.button("▶️ Resume Live Updates", use_container_width=True):
+        st.session_state.stop_updates = False
+        st.rerun()
 
 # ============================================================================
 # LIVE METRICS UPDATE FUNCTION
@@ -329,7 +351,7 @@ def update_live_metrics():
     if door_sensor_id:
         door_data = fn.get_current_door_status(door_sensor_id)
         if door_data and "doorClosed" in door_data:
-            # Display with emoji: 🔒 for closed, 🔓 for open
+            # Display with emoji: ✅ for closed, ⚠️ for open
             door_status = "✅ Closed" if door_data["doorClosed"] else "⚠️ Open"
             door_placeholder.metric("Door Status", door_status)
         else:
@@ -646,21 +668,31 @@ st.markdown(
 # ============================================================================
 # CONTINUOUS UPDATE LOOP WITH COUNTDOWN
 # ============================================================================
-# Update live metrics every 5 seconds for 2 minutes (24 cycles)
+# Update live metrics every 5 seconds for 6 minutes (72 cycles)
 # Displays countdown timer inside the Live Status header
+# 72 cycles limit is set to stay within free tier API limits
 
-cycles = 72  # 72 cycles * 5 seconds = 360 seconds (6 minutes)
+cycles = 72  # 72 cycles * 5 seconds = 360 seconds (6 minutes) - optimized for free tier API limits
 
 # Main update loop
-for _ in range(cycles):
+for cycle in range(cycles):
+    # Check if user requested to stop updates
+    if st.session_state.stop_updates:
+        status_header.markdown(
+            '### ⏸️ Live Updates Paused. (Click "▶️ Resume Live Updates" to continue.)'
+        )
+        break
+    
     # Countdown from 5 to 1 seconds
     for remaining in range(5, 0, -1):
-        status_header.markdown(f"### 🟢 Live (_Next status update in {remaining}s..._)")
-        time.sleep(2)  # Wait 2 second
+        status_header.markdown(f"### 🟢 Live (_Next update in {remaining}s..._)")
+        time.sleep(1)  # Wait 1 second
+    
     # Update live metrics after countdown completes
     update_live_metrics()
 
 # After the loop ends, display message that updates have stopped
-status_header.markdown(
-    '### 🛑 Live Updates Stopped. (Click "🔄 Refresh Data" to resume.)'
-)
+if not st.session_state.stop_updates:
+    status_header.markdown(
+        '### 🛑 Live Updates Stopped. (Click "🔄 Refresh Data" to resume.)'
+    )
