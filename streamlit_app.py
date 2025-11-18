@@ -342,7 +342,7 @@ def update_live_metrics():
         else:
             current_temp = temp_celsius
         # Update temperature display with 1 decimal place
-        temp_placeholder.metric("🌡️ Current Temperature", f" {current_temp:.1f}{temp_symbol}")
+        temp_placeholder.metric("Current Temperature", f"🌡️ {current_temp:.1f}{temp_symbol}")
     else:
         # Show N/A if no data available
         temp_placeholder.metric("Current Temperature", "N/A")
