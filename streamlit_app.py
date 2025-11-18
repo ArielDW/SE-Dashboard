@@ -649,18 +649,18 @@ st.markdown(
 # Update live metrics every 5 seconds for 2 minutes (24 cycles)
 # Displays countdown timer inside the Live Status header
 
-cycles = 24  # 24 cycles * 5 seconds = 120 seconds (2 minutes)
+cycles = 72  # 72 cycles * 5 seconds = 360 seconds (6 minutes)
 
 # Main update loop
 for _ in range(cycles):
     # Countdown from 5 to 1 seconds
     for remaining in range(5, 0, -1):
-        status_header.markdown(f"### 🟢 Live Status (_Next update in {remaining}s_)")
-        time.sleep(1)  # Wait 1 second
+        status_header.markdown(f"### 🟢 Live Status. (_Next update in {remaining}s_)")
+        time.sleep(2)  # Wait 2 second
     # Update live metrics after countdown completes
     update_live_metrics()
 
 # After the loop ends, display message that updates have stopped
 status_header.markdown(
-    "### 🛑 Live Updates Stopped. Click 🔄 Refresh Data to resume.)"
+    '### 🛑 Live Updates Stopped. (Click "🔄 Refresh Data" to resume.)'
 )
