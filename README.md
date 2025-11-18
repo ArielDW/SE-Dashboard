@@ -9,8 +9,7 @@ This is a Streamlit application designed to monitor temperatures and door status
 - Customizable time ranges and temperature units.
 - Threshold violation alerts for temperature.
 
-
-
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dashboard-l8.streamlit.app/)
 
 ## How to Run
 
@@ -26,6 +25,3 @@ This is a Streamlit application designed to monitor temperatures and door status
     ```bash
     streamlit run streamlit_app.py
     ```
-
-Open the hosted version.
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dashboard-l8.streamlit.app/)
