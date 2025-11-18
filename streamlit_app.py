@@ -330,7 +330,7 @@ def update_live_metrics():
         door_data = fn.get_current_door_status(door_sensor_id)
         if door_data and "doorClosed" in door_data:
             # Display with emoji: 🔒 for closed, 🔓 for open
-            door_status = "🔒 Closed" if door_data["doorClosed"] else "🔓 Open"
+            door_status = "Closed" if door_data["doorClosed"] else "🔓 Open"
             door_placeholder.metric("Door Status", door_status)
         else:
             # Show N/A if no data available
