@@ -21,7 +21,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import functions as fn # This is the functions.py file.
+import functions as fn  # This is the functions.py file.
 import time
 
 # ============================================================================
@@ -30,78 +30,11 @@ import time
 # Configure Streamlit page settings including title, icon, layout, and sidebar
 
 st.set_page_config(
-    page_title="Reefer Dashboard",  # Browser tab title
-    page_icon="🛰️",  # Browser tab icon 
+    page_title="Reefer Monitoring",  # Browser tab title
+    page_icon="🚚",  # Browser tab icon (truck emoji)
     layout="wide",  # Use full width of browser window
     initial_sidebar_state="expanded"  # Sidebar open by default
 )
-
-# ============================================================================
-# CUSTOM CSS STYLING
-# ============================================================================
-# Apply custom CSS to enhance the visual appearance of the dashboard
-# Styles include: metric containers, headers, alerts, and organization info box
-# Metric cards are styled using Streamlit theme variables so they look good
-# in both light and dark modes.
-
-st.markdown("""
-    <style>
-    /* Main content area padding */
-    .main {
-        padding: 0rem 1rem;
-    }
-
-    /* Metric container styling that respects Streamlit theme (card look) */
-    div[data-testid="metric-container"] {
-        background-color: var(--secondary-background-color);
-        border-radius: 8px;
-        padding: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-
-    /* Metric label text color */
-    div[data-testid="metric-container"] label {
-        color: var(--text-color) !important;
-    }
-
-    /* Metric value text color */
-    div[data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: var(--text-color) !important;
-    }
-
-    /* Main title styling - blue color with padding */
-    h1 {
-        color: #1f77b4;
-        padding-bottom: 10px;
-    }
-
-    /* Alert box spacing */
-    .stAlert {
-        margin-top: 10px;
-    }
-
-    /* Organization info box - light blue background with left border */
-    .org-info {
-        background-color: #e8f4f8;
-        padding: 15px;
-        border-radius: 8px;
-        border-left: 4px solid #1f77b4;
-        margin-bottom: 20px;
-    }
-
-    /* Organization info text styling */
-    .org-info p {
-        margin: 5px 0;
-        color: #31333F;
-    }
-
-    /* Organization info bold text - blue color */
-    .org-info strong {
-        color: #1f77b4;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 # ============================================================================
 # PAGE HEADER
@@ -131,15 +64,9 @@ def load_org_details():
 # Fetch organization details
 org_id, org_name = load_org_details()
 
-# Display organization info in a styled box at the top of sidebar
+# Display organization info at the top of sidebar
 if org_id and org_name:
-    st.sidebar.markdown(f"""
-    <div class="org-info">
-        <p><strong>Organization</strong></p>
-        <p><strong>Name:</strong> {org_name}</p>
-        <p><strong>ID:</strong> {org_id}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.sidebar.info(f"**Organization**\n\n**Name:** {org_name}\n\n**ID:** {org_id}")
 else:
     # Show warning if organization details cannot be loaded
     st.sidebar.warning("⚠️ Unable to load organization details")
@@ -715,9 +642,7 @@ else:
 
 st.markdown("---")  # Horizontal separator
 st.markdown(
-    "<div style='text-align: center; color: gray;'>Temperature & Door Monitoring Dashboard | "
-    f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>",
-    unsafe_allow_html=True
+    f"*Temperature & Door Monitoring Dashboard | Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*"
 )
 
 # ============================================================================
