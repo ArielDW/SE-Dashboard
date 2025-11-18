@@ -272,7 +272,7 @@ if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
 
 # Live status header with inline countdown
 status_header = st.empty()
-status_header.markdown("### 🟢 Live")
+status_header.markdown("### 🟡 Connecting...")
 
 # Create three columns for live metrics
 col1, col2, col3 = st.columns(3)
