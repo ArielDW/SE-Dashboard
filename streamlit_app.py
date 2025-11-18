@@ -30,8 +30,8 @@ import time
 # Configure Streamlit page settings including title, icon, layout, and sidebar
 
 st.set_page_config(
-    page_title="Reefer Monitoring",  # Browser tab title
-    page_icon="🚚",  # Browser tab icon (truck emoji)
+    page_title="Reefer Dashboard",  # Browser tab title
+    page_icon="🛰️",  # Browser tab icon 
     layout="wide",  # Use full width of browser window
     initial_sidebar_state="expanded"  # Sidebar open by default
 )
@@ -41,6 +41,8 @@ st.set_page_config(
 # ============================================================================
 # Apply custom CSS to enhance the visual appearance of the dashboard
 # Styles include: metric containers, headers, alerts, and organization info box
+# Metric cards are styled using Streamlit theme variables so they look good
+# in both light and dark modes.
 
 st.markdown("""
     <style>
@@ -48,43 +50,37 @@ st.markdown("""
     .main {
         padding: 0rem 1rem;
     }
-    
-    /* Metric container styling - light gray background */
-    .stMetric {
-        background-color: #f0f2f6;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    
-    /* Enhanced metric container with border */
+
+    /* Metric container styling that respects Streamlit theme (card look) */
     div[data-testid="metric-container"] {
-        background-color: #f0f2f6;
-        border: 1px solid #e0e0e0;
+        background-color: var(--secondary-background-color);
+        border-radius: 8px;
         padding: 10px;
-        border-radius: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-    
+
     /* Metric label text color */
     div[data-testid="metric-container"] label {
-        color: #31333F !important;
+        color: var(--text-color) !important;
     }
-    
+
     /* Metric value text color */
     div[data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: #31333F !important;
+        color: var(--text-color) !important;
     }
-    
+
     /* Main title styling - blue color with padding */
     h1 {
         color: #1f77b4;
         padding-bottom: 10px;
     }
-    
+
     /* Alert box spacing */
     .stAlert {
         margin-top: 10px;
     }
-    
+
     /* Organization info box - light blue background with left border */
     .org-info {
         background-color: #e8f4f8;
@@ -93,13 +89,13 @@ st.markdown("""
         border-left: 4px solid #1f77b4;
         margin-bottom: 20px;
     }
-    
+
     /* Organization info text styling */
     .org-info p {
         margin: 5px 0;
         color: #31333F;
     }
-    
+
     /* Organization info bold text - blue color */
     .org-info strong {
         color: #1f77b4;
