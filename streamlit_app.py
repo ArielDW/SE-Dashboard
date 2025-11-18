@@ -270,7 +270,9 @@ if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
 # Display real-time metrics that update every 5 seconds
 # Shows: Vehicle name, current temperature, current door status
 
-st.markdown("### 🟢 Live Status ")
+# Live status header with inline countdown
+status_header = st.empty()
+status_header.markdown("### 🟢 Live Status (Next update in 5s)")
 
 # Create three columns for live metrics
 col1, col2, col3 = st.columns(3)
@@ -286,9 +288,6 @@ with col2:
 # Column 3: Current door status (updates every 5 seconds)
 with col3:
     door_placeholder = st.empty()  # Placeholder for dynamic updates
-
-# Countdown placeholder (below the metrics row)
-countdown_placeholder = st.empty()
 
 # ============================================================================
 # LIVE METRICS UPDATE FUNCTION
@@ -342,7 +341,6 @@ def update_live_metrics():
 
 # Initial update - display metrics immediately on page load
 update_live_metrics()
-countdown_placeholder.markdown("Next update in **5s**")
 
 # ============================================================================
 # STATIC CONTENT - HISTORICAL DATA SECTION
@@ -649,7 +647,7 @@ st.markdown(
 # CONTINUOUS UPDATE LOOP WITH COUNTDOWN
 # ============================================================================
 # Update live metrics every 5 seconds for 2 minutes (24 cycles)
-# Displays countdown timer showing seconds until next update
+# Displays countdown timer inside the Live Status header
 
 cycles = 24  # 24 cycles * 5 seconds = 120 seconds (2 minutes)
 
@@ -657,11 +655,12 @@ cycles = 24  # 24 cycles * 5 seconds = 120 seconds (2 minutes)
 for _ in range(cycles):
     # Countdown from 5 to 1 seconds
     for remaining in range(5, 0, -1):
-        # Update countdown display
-        countdown_placeholder.markdown(f"Next update in **{remaining}s**")
+        status_header.markdown(f"### 🟢 Live Status (Next update in {remaining}s)")
         time.sleep(1)  # Wait 1 second
     # Update live metrics after countdown completes
     update_live_metrics()
 
 # After the loop ends, display message that updates have stopped
-countdown_placeholder.markdown("Live updates stopped. Click **🔄 Refresh Data** to resume.")
+status_header.markdown(
+    "### 🟢 Live Status (Live updates stopped. Click 🔄 Refresh Data to resume.)"
+)
