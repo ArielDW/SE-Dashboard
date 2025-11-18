@@ -261,6 +261,20 @@ door_display = st.sidebar.radio(
 )
 
 # ============================================================================
+# SIDEBAR - LIVE UPDATE CONTROL
+# ============================================================================
+# Move stop/resume live updates to sidebar to discourage frequent use
+
+st.sidebar.subheader("Live Update Control")
+
+if st.sidebar.button("⏸️ Stop Live Updates", use_container_width=True):
+    st.session_state.stop_updates = True
+
+if st.sidebar.button("▶️ Resume Live Updates", use_container_width=True):
+    st.session_state.stop_updates = False
+    st.rerun()
+
+# ============================================================================
 # SIDEBAR - REFRESH BUTTON
 # ============================================================================
 # Provide button to clear cache and reload all data
@@ -294,22 +308,6 @@ with col2:
 # Column 3: Current door status (updates every 5 seconds)
 with col3:
     door_placeholder = st.empty()  # Placeholder for dynamic updates
-
-# ============================================================================
-# LIVE UPDATE CONTROL BUTTONS
-# ============================================================================
-# Provide buttons to stop/resume live updates
-
-button_col1, button_col2 = st.columns(2)
-
-with button_col1:
-    if st.button("⏸️ Stop Live Updates", use_container_width=True):
-        st.session_state.stop_updates = True
-
-with button_col2:
-    if st.button("▶️ Resume Live Updates", use_container_width=True):
-        st.session_state.stop_updates = False
-        st.rerun()
 
 # ============================================================================
 # LIVE METRICS UPDATE FUNCTION
