@@ -662,7 +662,6 @@ st.markdown("---")  # Horizontal separator
 st.markdown(
     f"*Temperature & Door Monitoring Dashboard | Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*"
 )
-st.markdown("Built with Codex CLI 🚀")
 
 # ============================================================================
 # CONTINUOUS UPDATE LOOP WITH COUNTDOWN
